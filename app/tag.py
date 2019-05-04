@@ -122,24 +122,54 @@ def remove_item():
 
 
 
-@app.route('/tag/modifyItem')
+@app.route('/tag/modifyItem', methods=['POST'])
 def modify_item():
     """Update modification of users to database
 
-    This function return status code(100 = successful, 200 = failed)
-
-    Args:
-        userID: corresponding to current user
-        itemID:
-        LastUpdateTime:
-        Title(optional):
-        tag(optional):
+    URL: /tag/modifyItem
+    Method: POST
+    Content-Type: application/json
+    Body:   {
+                "userID": 123,
+                "itemID": 1234
+                "newItemID": 5678
+            }
 
 
     Returns:
-        TODO
+        successful:
+                100: successfully modify from database
+        failed:
+                201: userID not found
+                202: itemID not found
+                203: newItemID not found
+                204: can't update item from table
+                400: other errors, bad request
     """
 
-    lastUpdateTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if 'userID' not in request.json:
+        return make_response(jsonify({"error code": 201, "status": "fail", "ErrorInfo": "Error: userID not found"}), 201)
 
-    return str(lastUpdateTime)
+    userID = request.json['userID']
+
+    #
+    #
+    # Todo: Add validation part
+    #
+    #
+
+    if 'itemID' not in request.json:
+        return make_response(jsonify({"error code": 202, "status": "fail", "ErrorInfo": "Error: itemID not found"}), 202)
+    itemID = request.json['itemID']
+
+    if 'newItemID' not in request.json:
+        return make_response(jsonify({"error code": 203, "status": "fail", "ErrorInfo": "Error: newItemID not found"}), 203)
+    newItemID = request.json['newItemID']
+
+    try:
+        db.session.query.filter_by(itemID=itemID, userID=userID).update({"itemID": newItemID})
+        db.session.commit()
+        return make_response(jsonify({"status": "success"}), 200)
+    except:
+        return make_response(jsonify({"error code": 204, "status": "fail", "ErrorInfo": "Error: can not delete item from database"}), 204)
+
