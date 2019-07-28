@@ -1,5 +1,4 @@
 from app.__init__ import db
-
 db = db
 
 
